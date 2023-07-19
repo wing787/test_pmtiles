@@ -18,7 +18,10 @@ const map = new maplibregl.Map({
     sources: {
       gsi: {
         type: 'raster',
-        tiles: ['https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png'],
+        // 地理院タイル 標準地図
+        // tiles: ['https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png'],
+        // 地理院タイル 淡色地図
+        tiles: ['https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'],
         tileSize: 256,  // Tile size in pixels, default is 512
         maxzoom: 19,
         attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>',
@@ -40,11 +43,16 @@ const map = new maplibregl.Map({
         source: 'pmtiles',
         'source-layer': 'chochomoku_allgeojsonl',
         type: 'line',
+        minzoom: 12,
         paint: {
-          'line-color': 'rgba(0, 73, 147, 1)',
-          'line-width': 1.5
+          'line-color': 'rgba(0, 100, 0, 1)',
+          'line-width': 2
         },
       },
     ]
   },
-})
+});
+map.on('zoom', function() {
+  var zoom = map.getZoom();
+  document.getElementById('zoom-value').innerText = zoom.toFixed(2); // 四捨五入して2桁の小数に設定
+});

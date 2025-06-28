@@ -1,11 +1,13 @@
-// import './style.css';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as pmtiles from 'pmtiles';
 
+
 // parameters
 let polygons_outline_width = 2.5;
 let polygons_outline_color = 'rgba(0, 0, 205, 1)';
+const zoom_level_city_town = 12.5;
+const zoom_level_pref_city = 7.5;
 
 const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol("pmtiles", protocol.tile);
@@ -19,6 +21,7 @@ const map = new maplibregl.Map({
   // maxBounds:[122, 20, 154, 50],
   style: {
     version: 8,
+    // glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf',
     sources: {
       gsi: {
         type: 'raster',
@@ -52,7 +55,7 @@ const map = new maplibregl.Map({
         source: 'pmtiles_town',
         'source-layer': 'chochomoku_allgeojsonl',
         type: 'line',
-        minzoom: 12.5,
+        minzoom: zoom_level_city_town,
         paint: {
           'line-color': polygons_outline_color,
           'line-width': polygons_outline_width
@@ -63,7 +66,7 @@ const map = new maplibregl.Map({
         source: 'pmtiles_city',
         'source-layer': 'city_mastergeojsonl',
         type: 'line',
-        maxzoom: 12.5,
+        maxzoom: zoom_level_city_town,
         paint: {
           'line-color': polygons_outline_color,
           'line-width': polygons_outline_width
@@ -75,4 +78,25 @@ const map = new maplibregl.Map({
 map.on('zoom', function() {
   var zoom = map.getZoom();
   document.getElementById('zoom-value').innerText = zoom.toFixed(2); // 四捨五入して2桁の小数に設定
+});
+// Add population lavel layer
+map.on('load', function() {
+  // Add population lavel layer
+  map.addLayer({
+    'id': 'population_lavel_town',
+    'type': 'symbol',
+    'source': 'pmtiles_town',
+    'source-layer': 'chochomoku_allgeojsonl',
+    'maxzoom': zoom_level_city_town + 1,
+    'layout': {
+      'text-field': ['concat', ['number-format', ['get', 'JINKO'], {}], '人'],
+      // 'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+      'text-size': 10
+    },
+    'paint': {
+      'text-color': 'rgba(0, 101, 203, 1)',
+      'text-halo-color': 'rgba(255,255,255,1)', // ラベルの外枠の色を白に設定
+      'text-halo-width': 1 // ラベルの外枠の幅を2に設定
+    }
+  });
 });

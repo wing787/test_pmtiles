@@ -6,8 +6,9 @@ import * as pmtiles from 'pmtiles';
 // parameters
 let polygons_outline_width = 2.5;
 let polygons_outline_color = 'rgba(0, 0, 205, 1)';
+
 const zoom_level_city_town = 12.5;
-const zoom_level_pref_city = 7.5;
+const zoom_level_pref_city = 8.5;
 
 const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol("pmtiles", protocol.tile);
@@ -16,12 +17,13 @@ const map = new maplibregl.Map({
   container: 'map',
   center: [139.5787562, 35.7024594],
   zoom: 13,
-  minZoom: 4,
+  minZoom: 2,
   maxZoom: 18,
   // maxBounds:[122, 20, 154, 50],
   style: {
     version: 8,
     // glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf',
+    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
     sources: {
       gsi: {
         type: 'raster',
@@ -42,6 +44,11 @@ const map = new maplibregl.Map({
         type: 'vector',
         url: 'pmtiles://https://test-pmtiles.s3.ap-northeast-1.amazonaws.com/kokudosuuchi/city_master.pmtiles',
         attribution: '&copy; <a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_1.html" target="_blank">国土数値情報 - 行政区域データ - </a>',
+      },
+      pmtiles_pref :{
+        type: 'vector',
+        url: 'pmtiles://https://test-pmtiles.s3.ap-northeast-1.amazonaws.com/kokudosuuchi/prefecture_master.pmtiles',
+        attribution: '&copy; <a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-v3_1.html" target="_blank">国土数値情報 - 行政区域データ - </a>',
       }
     },
     layers: [
@@ -49,6 +56,32 @@ const map = new maplibregl.Map({
         id: 'gsi-layer',
         source: 'gsi',
         type: 'raster',
+        paint: {
+          'raster-saturation': -1
+        }
+      },
+      {
+        id: 'pmtiles_pref-layer',
+        source: 'pmtiles_pref',
+        'source-layer': 'N0320240101_prefecture',
+        type: 'line',
+        maxzoom: zoom_level_pref_city,
+        paint: {
+          'line-color': polygons_outline_color,
+          'line-width': polygons_outline_width
+        }
+      },
+      {
+        id: 'pmtiles_city-layer',
+        source: 'pmtiles_city',
+        'source-layer': 'city_mastergeojsonl',
+        type: 'line',
+        maxzoom: zoom_level_city_town,
+        minzoom: zoom_level_pref_city,
+        paint: {
+          'line-color': polygons_outline_color,
+          'line-width': polygons_outline_width
+        }
       },
       {
         id: 'pmtiles_town-layer',
@@ -60,17 +93,6 @@ const map = new maplibregl.Map({
           'line-color': polygons_outline_color,
           'line-width': polygons_outline_width
         },
-      },
-      {
-        id: 'pmtiles_city-layer',
-        source: 'pmtiles_city',
-        'source-layer': 'city_mastergeojsonl',
-        type: 'line',
-        maxzoom: zoom_level_city_town,
-        paint: {
-          'line-color': polygons_outline_color,
-          'line-width': polygons_outline_width
-        }
       }
     ]
   },
@@ -87,11 +109,11 @@ map.on('load', function() {
     'type': 'symbol',
     'source': 'pmtiles_town',
     'source-layer': 'chochomoku_allgeojsonl',
-    'maxzoom': zoom_level_city_town + 1,
+    'minzoom': zoom_level_city_town + 1,
     'layout': {
-      'text-field': ['concat', ['number-format', ['get', 'JINKO'], {}], '人'],
+      'text-field': ['concat', ['get', 'S_NAME'], '\n', ['number-format', ['get', 'JINKO'], {}], '人'],
       // 'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-      'text-size': 10
+      'text-size': 15
     },
     'paint': {
       'text-color': 'rgba(0, 101, 203, 1)',

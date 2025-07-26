@@ -111,7 +111,7 @@ map.on('load', function() {
     'source-layer': 'chochomoku_allgeojsonl',
     'minzoom': zoom_level_city_town + 1,
     'layout': {
-      'text-field': ['concat', ['get', 'S_NAME'], '\n', ['number-format', ['get', 'JINKO'], {}], '人'],
+      'text-field': ['concat', ['get', 'S_NAME'], '\n',['number-format', ['get', 'SETAI'], {}], '世帯', '\n', ['number-format', ['get', 'JINKO'], {}], '人'],
       // 'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
       'text-size': 15
     },
